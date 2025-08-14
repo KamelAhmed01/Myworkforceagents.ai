@@ -1,0 +1,58 @@
+<svg width="200" height="120" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Infinity Symbol -->
+  <g transform="translate(50, 30)">
+    <!-- Left loop -->
+    <path d="M25 30C25 16.193 13.807 5 0 5C-13.807 5 -25 16.193 -25 30C-25 43.807 -13.807 55 0 55C13.807 55 25 43.807 25 30Z" 
+          fill="none" 
+          stroke="url(#gradient1)" 
+          stroke-width="4" 
+          stroke-linecap="round"/>
+    
+    <!-- Right loop -->
+    <path d="M75 30C75 16.193 86.193 5 100 5C113.807 5 125 16.193 125 30C125 43.807 113.807 55 100 55C86.193 55 75 43.807 75 30Z" 
+          fill="none" 
+          stroke="url(#gradient2)" 
+          stroke-width="4" 
+          stroke-linecap="round"/>
+    
+    <!-- Center connection -->
+    <line x1="25" y1="30" x2="75" y2="30" 
+          stroke="url(#gradient3)" 
+          stroke-width="4" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- MWA.AI Text -->
+  <text x="100" y="90" 
+        text-anchor="middle" 
+        font-family="Arial, sans-serif" 
+        font-size="24" 
+        font-weight="bold" 
+        fill="#1a1a1a">MWA.AI</text>
+  
+  <!-- Tagline -->
+  <text x="100" y="105" 
+        text-anchor="middle" 
+        font-family="Arial, sans-serif" 
+        font-size="8" 
+        font-weight="600" 
+        fill="#666" 
+        letter-spacing="1px">YOUR TRUSTED AI TRANSFORMATION PARTNER</text>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0066ff"/>
+      <stop offset="100%" style="stop-color:#00d4ff"/>
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+    <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0066ff"/>
+      <stop offset="50%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+  </defs>
+</svg>
