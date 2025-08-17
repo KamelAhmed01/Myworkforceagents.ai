@@ -103,10 +103,11 @@
 .brand-text {
     font-size: 24px;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
     letter-spacing: -0.3px;
     text-align: center;
 }
@@ -1239,20 +1240,46 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     perspective: 1000px;
-    padding: 40px 0;
+    padding: 20px 12px;
     position: relative;
     z-index: 1000;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
 }
 
 .game-card {
     position: relative;
-    width: 280px;
-    height: 400px;
+    width: 260px;
+    height: 380px;
     cursor: pointer;
     transition: transform 0.3s ease;
     z-index: 10;
+    /* Ensure each card is its own 3D context (Safari fix) */
+    perspective: 1000px;
+}
+
+/* Responsive sizing for better fit */
+@media (max-width: 1200px) {
+    .cards-container { gap: 20px; }
+    .game-card { width: 250px; height: 370px; }
+}
+
+@media (max-width: 1024px) {
+    .cards-container { gap: 18px; padding: 16px 10px; }
+    .game-card { width: 240px; height: 360px; }
+}
+
+@media (max-width: 768px) {
+    .cards-container { gap: 16px; padding: 14px 8px; }
+    .game-card { width: 220px; height: 330px; }
+}
+
+@media (max-width: 600px) {
+    .cards-container { gap: 12px; padding: 12px 6px; }
+    .game-card { width: 200px; height: 300px; }
 }
 
 /* Fan Layout Positioning */
@@ -1273,20 +1300,20 @@
 
 /* Hover Effects - Cards flip on hover */
 .game-card:hover {
-    transform: translateY(-20px) scale(1.05);
+    transform: translateY(-16px) scale(1.04);
     z-index: 100;
 }
 
 .game-card:nth-child(1):hover {
-    transform: rotate(-15deg) translateY(-20px) scale(1.05);
+    transform: rotate(-15deg) translateY(-16px) scale(1.04);
 }
 
 .game-card:nth-child(2):hover {
-    transform: rotate(0deg) translateY(-20px) scale(1.05);
+    transform: rotate(0deg) translateY(-16px) scale(1.04);
 }
 
 .game-card:nth-child(3):hover {
-    transform: rotate(15deg) translateY(-20px) scale(1.05);
+    transform: rotate(15deg) translateY(-16px) scale(1.04);
 }
 
 /* Hover flip effect */
@@ -1319,6 +1346,9 @@
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border-radius: 20px;
+    /* Improve rendering stability */
+    -webkit-transform-style: preserve-3d;
+    will-change: transform;
 }
 
 .game-card.flipped .card-inner {
@@ -1330,7 +1360,9 @@
     position: absolute;
     width: 100%;
     height: 100%;
+    /* Hide backfaces reliably across browsers */
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 
@@ -1341,12 +1373,15 @@
 .card-back {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     border: 2px solid rgba(0, 212, 255, 0.3);
+    transform: rotateY(0deg);
+    z-index: 1;
 }
 
 .card-front {
     background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #2a2a4e 100%);
     border: 2px solid rgba(0, 212, 255, 0.5);
     transform: rotateY(180deg);
+    z-index: 2;
 }
 
 /* Tech Pattern Background */
@@ -1358,6 +1393,9 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* Prevent visual bleed-through on flip */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .circuit-grid {
@@ -1373,6 +1411,8 @@
         radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.3) 2px, transparent 2px);
     background-size: 30px 30px, 30px 30px, 60px 60px, 60px 60px;
     animation: circuitFlow 6s linear infinite;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes circuitFlow {
@@ -1401,6 +1441,8 @@
         rgba(0, 212, 255, 0.1) 50%, 
         transparent 70%);
     animation: holoSweep 4s ease-in-out infinite;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes holoSweep {
@@ -1421,6 +1463,9 @@
     animation: brandGlow 3s ease-in-out infinite alternate;
     z-index: 10;
     position: relative;
+    /* Ensure the back logo never renders when card is flipped */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes brandGlow {
@@ -1523,6 +1568,38 @@
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), text-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, text-shadow, color;
+    font-family: 'Clash Display', 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+/* Simple focus-on-hover for entire card affecting description */
+.game-card:hover .card-body p {
+    transform: scale(1.04);
+    color: #ffffff;
+    text-shadow:
+        0 0 12px rgba(255, 255, 255, 0.30),
+        0 0 24px rgba(255, 255, 255, 0.20),
+        0 0 10px rgba(0, 212, 255, 0.25);
+    transition-delay: 0.4s; /* wait for card flip */
+    animation: cardTextGlow 2.2s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+@keyframes cardTextGlow {
+    0%, 100% {
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 0.25),
+            0 0 20px rgba(255, 255, 255, 0.15),
+            0 0 8px rgba(0, 212, 255, 0.20);
+    }
+    50% {
+        text-shadow:
+            0 0 18px rgba(255, 255, 255, 0.45),
+            0 0 36px rgba(255, 255, 255, 0.30),
+            0 0 14px rgba(0, 212, 255, 0.35);
+    }
 }
 
 .card-actions {
@@ -1530,7 +1607,7 @@
     gap: 15px;
 }
 
-.btn-back, .btn-select {
+.btn-select {
     flex: 1;
     padding: 12px 20px;
     border: none;
@@ -1544,19 +1621,6 @@
     font-family: 'Orbitron', monospace;
 }
 
-.btn-back {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.btn-back:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-}
-
 .btn-select {
     background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     color: white;
@@ -1568,6 +1632,60 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 102, 255, 0.5);
     background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+}
+
+/* Enhanced Click Feedback and Pending Animation */
+.btn-select:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(0, 102, 255, 0.4);
+    transition: all 0.1s ease;
+}
+
+.game-card.pending {
+    animation: cardPending 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.game-card.pending .btn-select {
+    background: linear-gradient(135deg, #666, #888);
+    color: rgba(255, 255, 255, 0.7);
+    animation: buttonPulse 1s ease-in-out infinite;
+}
+
+.game-card.pending .btn-select::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border: 2px solid transparent;
+    border-top: 2px solid rgba(255, 255, 255, 0.7);
+    border-right: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes cardPending {
+    0%, 100% { 
+        transform: scale(1) translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+    }
+    50% { 
+        transform: scale(1.02) translateY(-12px);
+        box-shadow: 0 15px 40px rgba(0, 212, 255, 0.5);
+    }
+}
+
+@keyframes buttonPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Hand Shadow Effect */
@@ -3735,9 +3853,9 @@
 }
 
 .type-form-container {
-    max-width: 1008px !important; /* 40% wider - 720px * 1.4 */
+    max-width: 1200px !important; /* Made 20% wider for better interaction */
     width: 100% !important;
-    height: 855px !important; /* 150% larger - 380px * 2.25 */
+    height: 900px !important; /* Slightly taller for better chat experience */
 }
 
 .chat-interface {
@@ -3750,7 +3868,7 @@
     overflow: visible; /* Changed from hidden to visible */
     backdrop-filter: blur(15px);
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8); /* Smaller shadow */
-    max-height: 855px !important; /* 150% larger - 380px * 2.25 */
+    max-height: 900px !important; /* Updated to match container height */
 }
 
 .chat-header {
@@ -8194,9 +8312,7 @@ section:not(:last-child)::after {
     backdrop-filter: blur(10px);
 }
 
-.step.active {
-    /* Animation will handle the active state */
-}
+/* .step.active intentionally handled via animations; no static rules needed */
 
 .step-number {
     width: 60px;
@@ -8742,11 +8858,9 @@ section:not(:last-child)::after {
   filter:
     drop-shadow(0 0 30px rgba(0, 212, 255, 0.5))
     drop-shadow(0 0 60px rgba(139, 92, 246, 0.3))
-    hue-rotate(200deg)
-    saturate(1.3)
-    brightness(1.2);
+    brightness(1.0);
   transition: var(--transition-smooth);
-  animation: heroInfinityRotate 8s linear infinite;
+  animation: heroInfinityRotate 8s linear infinite, heroInfinityPulse 3s ease-in-out infinite;
   display: inline-block;
   transform-origin: center;
 }
@@ -8763,36 +8877,575 @@ section:not(:last-child)::after {
 }
 
 @keyframes heroInfinityRotate {
-  0% {
-    transform: rotate(0deg);
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pulse glow + expansion (like the tagline) */
+@keyframes heroInfinityPulse {
+  0%, 100% {
+    transform: scale(1);
     filter:
-      drop-shadow(0 0 30px rgba(255, 255, 255, 0.8))
-      drop-shadow(0 0 60px rgba(255, 255, 255, 0.4))
-      saturate(1.0)
-      brightness(1.5);
+      drop-shadow(0 0 20px rgba(0, 212, 255, 0.35))
+      drop-shadow(0 0 40px rgba(139, 92, 246, 0.2))
+      brightness(1.0);
   }
-  33% {
-    transform: rotate(120deg);
+  50% {
+    transform: scale(1.08);
     filter:
       drop-shadow(0 0 35px rgba(0, 212, 255, 0.8))
-      drop-shadow(0 0 70px rgba(0, 212, 255, 0.4))
-      saturate(1.4)
-      brightness(1.3);
+      drop-shadow(0 0 70px rgba(139, 92, 246, 0.5))
+      brightness(1.2);
   }
-  66% {
-    transform: rotate(240deg);
-    filter:
-      drop-shadow(0 0 40px rgba(26, 26, 46, 0.8))
-      drop-shadow(0 0 80px rgba(26, 26, 46, 0.4))
-      saturate(1.2)
-      brightness(0.8);
+}
+
+/* Optional: switch to pulse-only (no rotation) by adding class to the image */
+.hero-infinity-symbol.pulse-only {
+  animation: heroInfinityPulse 3s ease-in-out infinite;
+}
+
+/* ========================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS
+   ======================================== */
+
+/* Mobile Navigation Improvements */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 0;
   }
-  100% {
-    transform: rotate(360deg);
-    filter:
-      drop-shadow(0 0 30px rgba(255, 255, 255, 0.8))
-      drop-shadow(0 0 60px rgba(255, 255, 255, 0.4))
-      saturate(1.0)
-      brightness(1.5);
+  
+  .nav-brand {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .brand-logo {
+    font-size: 20px;
+  }
+  
+  .brand-tagline {
+    font-size: 10px;
+  }
+  
+  .infinity-symbol {
+    width: 35px;
+  }
+  
+  /* Mobile Menu Button */
+  .mobile-menu-btn {
+    display: block !important;
+    position: relative;
+    z-index: 1001;
+    background: none;
+    border: none;
+    padding: 8px;
+    transition: var(--transition-normal);
+  }
+  
+  .mobile-menu-btn:hover {
+    color: var(--accent-color);
+    transform: scale(1.1);
+  }
+  
+  .mobile-menu-btn.active {
+    color: var(--accent-color);
+  }
+  
+  /* Navigation Links Mobile */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.98) 0%, 
+      rgba(26, 26, 46, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 100px 30px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nav-links.active {
+    right: 0;
+  }
+  
+  .nav-links a {
+    font-size: 18px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    transition: var(--transition-normal);
+    border-left: 3px solid transparent;
+  }
+  
+  .nav-links a:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-left-color: var(--accent-color);
+    transform: translateX(5px);
+  }
+  
+  .nav-links .btn {
+    justify-content: center;
+    margin-top: 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border: none;
+    color: white;
+  }
+  
+  /* Menu Overlay */
+  body.menu-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+  
+  body.menu-open {
+    overflow: hidden;
+  }
+}
+
+/* Mobile Hero Section */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 120px 0 60px;
+    min-height: auto;
+  }
+  
+  .hero-content {
+    gap: 40px;
+  }
+  
+  .hero-text h1 {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+  
+  .hero-text .tagline {
+    font-size: 16px;
+    margin: 15px 0;
+  }
+  
+  .hero-text p {
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+  
+  .hero-infinity-symbol {
+    width: 80px;
+  }
+  
+  .hero-logo {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-text h1 {
+    font-size: 28px;
+  }
+  
+  .hero-text .tagline {
+    font-size: 14px;
+  }
+  
+  .hero-text p {
+    font-size: 14px;
+  }
+  
+  .hero-infinity-symbol {
+    width: 60px;
+  }
+}
+
+/* Mobile Game Cards */
+@media (max-width: 768px) {
+  .game-selection {
+    padding: 60px 0;
+  }
+  
+  .cards-container {
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+  
+  .game-card {
+    width: 280px !important;
+    height: 400px !important;
+  }
+  
+  .selection-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+  
+  .selection-subtitle {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-card {
+    width: 260px !important;
+    height: 380px !important;
+  }
+  
+  .card-header h3 {
+    font-size: 22px;
+  }
+  
+  .card-body p {
+    font-size: 14px;
+  }
+  
+  .btn-select {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Mobile Chat Interface */
+@media (max-width: 768px) {
+  .type-interface,
+  .voice-interface {
+    padding: 20px;
+  }
+  
+  .type-form-container {
+    max-width: 95% !important;
+    width: 95% !important;
+    height: 70vh !important;
+    min-height: 500px;
+  }
+  
+  .chat-interface {
+    max-height: 70vh !important;
+  }
+  
+  .chat-header {
+    padding: 15px 20px;
+    gap: 15px;
+  }
+  
+  .ai-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .chat-title h3 {
+    font-size: 18px;
+  }
+  
+  .chat-status {
+    font-size: 12px;
+  }
+  
+  .chat-messages {
+    padding: 15px 20px;
+  }
+  
+  .message {
+    margin-bottom: 15px;
+  }
+  
+  .message-content {
+    padding: 12px 16px;
+    font-size: 14px;
+    max-width: 85%;
+  }
+  
+  .chat-form {
+    padding: 15px 20px;
+    gap: 10px;
+  }
+  
+  .chat-input {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+  
+  .chat-send-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .type-form-container {
+    width: 100% !important;
+    height: 65vh !important;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .chat-interface {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .chat-header {
+    padding: 12px 15px;
+  }
+  
+  .ai-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .chat-title h3 {
+    font-size: 16px;
+  }
+  
+  .message-content {
+    font-size: 13px;
+    max-width: 90%;
+  }
+}
+
+/* Mobile Voice Interface */
+@media (max-width: 768px) {
+  .side-by-side-voice-interface {
+    padding: 20px;
+    gap: 30px;
+  }
+  
+  .voice-interface-header h3 {
+    font-size: 24px;
+  }
+  
+  .voice-interface-header p {
+    font-size: 14px;
+  }
+  
+  .voice-interface-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .audio-globe-container {
+    height: 300px;
+  }
+  
+  .voice-controls {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .voice-interface-header h3 {
+    font-size: 20px;
+  }
+  
+  .audio-globe-container {
+    height: 250px;
+  }
+  
+  .voice-controls {
+    padding: 15px;
+  }
+  
+  .voice-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+}
+
+/* Mobile Transformation Timeline */
+@media (max-width: 768px) {
+  .transformation-timeline {
+    padding: 60px 0;
+  }
+  
+  .transformation-header h2 {
+    font-size: 32px;
+  }
+  
+  .transformation-header p {
+    font-size: 16px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .stat-item {
+    padding: 20px;
+  }
+  
+  .stat-number {
+    font-size: 36px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+  }
+}
+
+/* Mobile AI Journey */
+@media (max-width: 768px) {
+  .ai-journey {
+    padding: 60px 0;
+  }
+  
+  .journey-header h2 {
+    font-size: 32px;
+  }
+  
+  .customer-quote {
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .customer-quote p {
+    font-size: 14px;
+  }
+  
+  .quote-author {
+    font-size: 12px;
+  }
+  
+  .quote-metrics {
+    gap: 10px;
+  }
+  
+  .metric {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* Mobile Meet Our Human Section */
+@media (max-width: 768px) {
+  .meet-human {
+    padding: 60px 0;
+  }
+  
+  .human-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+  
+  .human-image {
+    justify-self: center;
+  }
+  
+  .human-content h2 {
+    font-size: 28px;
+  }
+  
+  .human-content h3 {
+    font-size: 20px;
+  }
+  
+  .action-bullets {
+    gap: 15px;
+  }
+  
+  .action-bullet {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Mobile Meet Our Agents Section */
+@media (max-width: 768px) {
+  .meet-agents {
+    padding: 60px 0;
+  }
+  
+  .agents-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .agent-card {
+    padding: 25px;
+  }
+  
+  .agent-card h3 {
+    font-size: 20px;
+  }
+  
+  .agent-card p {
+    font-size: 14px;
+  }
+  
+  .savings-highlight {
+    font-size: 16px;
+    padding: 15px;
+  }
+}
+
+/* Mobile Footer */
+@media (max-width: 768px) {
+  .learn-more-footer {
+    padding: 40px 0;
+  }
+  
+  .learn-more-header h2 {
+    font-size: 28px;
+  }
+  
+  .learn-more-header p {
+    font-size: 14px;
+  }
+  
+  .footer-buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .learn-more-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .game-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-select:hover,
+  .learn-more-btn:hover,
+  .chat-send-btn:hover {
+    background: var(--primary-color);
+    transform: none;
+  }
+  
+  /* Make buttons larger for touch */
+  .btn-select,
+  .chat-send-btn,
+  .voice-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Increase tap targets */
+  .game-card {
+    cursor: pointer;
   }
 }

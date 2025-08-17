@@ -2,6 +2,45 @@
 let globalStartTime = null;
 let globalTimerInterval = null;
 
+// Mobile detection and utilities
+const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+};
+
+const isTouchDevice = () => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
+// Mobile-specific optimizations
+function optimizeForMobile() {
+    if (isMobile()) {
+        // Add mobile class to body for CSS targeting
+        document.body.classList.add('mobile-device');
+        
+        // Improve touch responsiveness
+        document.body.style.touchAction = 'manipulation';
+        
+        // Prevent zoom on form inputs
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                }
+            });
+            
+            input.addEventListener('blur', () => {
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                }
+            });
+        });
+    }
+}
+
 // Global functions for HTML onclick handlers
 function scrollToExperiences() {
     const experiencesSection = document.getElementById('experiences');
@@ -119,6 +158,9 @@ function initializeBackToExperiencesButton() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 MWA.AI System Initializing...');
     
+    // Initialize mobile optimizations first
+    optimizeForMobile();
+    
     // Start global time tracking immediately (hidden from user)
     startGlobalTimeTracking();
     
@@ -200,16 +242,44 @@ function selectCard(cardType) {
     
     const gameCard = document.querySelector(`[data-card="${cardType}"]`);
     
-    // Add selection state
-    gameCard.classList.add('selected');
+    // Prevent double-tapping on mobile
+    if (gameCard.classList.contains('selected')) {
+        console.log('🚫 Card already selected, preventing double selection');
+        return;
+    }
+    
+    // Play click/selection sound
+    try { playCardFlipSound(); } catch (_) {}
+
+    // Add selection state and pending animation
+    gameCard.classList.add('selected', 'pending');
+    
+    // Provide haptic feedback on mobile devices
+    if (isTouchDevice() && navigator.vibrate) {
+        navigator.vibrate(50); // Short vibration for feedback
+    }
+    
+    // Update button text to show loading
+    const button = gameCard.querySelector('.btn-select');
+    const originalText = button.innerHTML;
+    button.innerHTML = 'Loading... <i class="fas fa-spinner fa-spin"></i>';
+    
+    // Disable button to prevent multiple clicks
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
     
     // Create dramatic effect
     createCardSelectionEffect(gameCard);
     
+    // Adjust timing for mobile devices (slightly faster for better UX)
+    const delay = isMobile() ? 800 : 1200;
+    
     // Start infinity zoom transition after a brief moment
     setTimeout(() => {
+        // Remove pending state before transition
+        gameCard.classList.remove('pending');
         startInfinityToHourglassTransition(cardType);
-    }, 1200);
+    }, delay);
 }
 
 // Enhanced infinity-to-hourglass transition with real estate themed cinematic effects
@@ -582,13 +652,13 @@ function createClickInterface() {
                         </div>
                         <div class="size-card" data-value="brokerage">
                             <i class="fas fa-building"></i>
-                            <h4>Brokerage</h4>
+                            <h4>Mid-Sized Brokerage</h4>
                             <p>11-50 agents</p>
                         </div>
                         <div class="size-card" data-value="large-brokerage">
                             <i class="fas fa-city"></i>
                             <h4>Large Brokerage</h4>
-                            <p>50+ agents</p>
+                            <p>51+ agents</p>
                         </div>
                     </div>
                 </div>
@@ -596,32 +666,39 @@ function createClickInterface() {
                 <!-- Step 3: AI Goals -->
                 <div class="form-step" data-step="3">
                     <div class="step-header">
-                        <h3>AI Automation Priorities</h3>
+                        <h3>Choose Your AI Agent Priorities</h3>
+                        <p class="step-subcaption">Select the digital employees you want to put to work first.</p>
                     </div>
                     <div class="goals-grid">
-                        <div class="goal-item" data-value="lead-response">
+                        <div class="goal-item" data-value="instant-lead-response">
                             <div class="goal-icon"><i class="fas fa-bolt"></i></div>
-                            <h4>Instant Lead Response</h4>
+                            <h4>Instant Lead Response (FINN + LISA)</h4>
+                            <p class="goal-desc">Reply quickly, qualify, auto-book showings.</p>
                         </div>
-                        <div class="goal-item" data-value="client-communication">
+                        <div class="goal-item" data-value="client-communications">
                             <div class="goal-icon"><i class="fas fa-comments"></i></div>
-                            <h4>Client Communication</h4>
+                            <h4>Client Communications (LISA + ROSS)</h4>
+                            <p class="goal-desc">Send DMs/texts/emails via voice—manage updates, reschedules, follow‑ups.</p>
                         </div>
-                        <div class="goal-item" data-value="market-analysis">
-                            <div class="goal-icon"><i class="fas fa-chart-line"></i></div>
-                            <h4>Market Analysis</h4>
+                        <div class="goal-item" data-value="listing-social-optimization">
+                            <div class="goal-icon"><i class="fas fa-bullhorn"></i></div>
+                            <h4>Listing & Social Optimization (RESE)</h4>
+                            <p class="goal-desc">Auto-generate, brand, syndicate listings and social content.</p>
                         </div>
                         <div class="goal-item" data-value="transaction-management">
                             <div class="goal-icon"><i class="fas fa-file-contract"></i></div>
-                            <h4>Transaction Management</h4>
+                            <h4>Transaction Management (TESSA)</h4>
+                            <p class="goal-desc">Track deadlines, prep packets, send reminders, manage deal progress.</p>
                         </div>
-                        <div class="goal-item" data-value="listing-optimization">
-                            <div class="goal-icon"><i class="fas fa-search"></i></div>
-                            <h4>Listing Optimization</h4>
+                        <div class="goal-item" data-value="follow-up-nurture-automation">
+                            <div class="goal-icon"><i class="fas fa-seedling"></i></div>
+                            <h4>Follow-Up & Nurture Automation (LISA + FINN)</h4>
+                            <p class="goal-desc">Re-engage cold leads, post-showing touchpoints, long-term nurture.</p>
                         </div>
-                        <div class="goal-item" data-value="follow-up-automation">
-                            <div class="goal-icon"><i class="fas fa-clock"></i></div>
-                            <h4>Follow-up Automation</h4>
+                        <div class="goal-item" data-value="voice-activated-control">
+                            <div class="goal-icon"><i class="fas fa-microphone"></i></div>
+                            <h4>Voice-Activated Agent Control (ROSS)</h4>
+                            <p class="goal-desc">Hands-free control—add leads, send updates, schedule tasks via voice.</p>
                         </div>
                     </div>
                 </div>
@@ -692,7 +769,7 @@ function createTypeInterface() {
                     </div>
                     <div class="chat-info">
                         <h3>MWA.AI Assistant</h3>
-                        <span class="status">Ready to help</span>
+                        <span class="status">At Your Service 24/7.</span>
                     </div>
                     <div class="chat-controls">
                         <button class="minimize-btn"><i class="fas fa-minus"></i></button>
@@ -738,8 +815,8 @@ function createVoiceInterface() {
         <div class="voice-form-container">
             <div class="voice-interface">
                 <div class="voice-header">
-                    <h2>Voice AI Assistant</h2>
-                    <p>Speak naturally with our AI-powered voice agent</p>
+                    <h2>AI Voice Assistant with Hands‑free control and real‑time voice interaction for your AI team.</h2>
+                    <p>Talk naturally, and let your AI handle the rest.</p>
                 </div>
                 
                 <div class="voice-layout">
@@ -765,8 +842,8 @@ function createVoiceInterface() {
                                 <!-- 3D Globe Visualizer -->
                                 <div class="globe-visualizer-panel">
                                     <div class="visualizer-header">
-                                        <h4><i class="fas fa-globe"></i> Audio Globe</h4>
-                                        <p>Watch the globe react to conversation</p>
+                                        <h4><i class="fas fa-globe"></i> Audio Globe: Visualize the conversation in real time.</h4>
+                                        <p>Watch the 3D globe react dynamically to every spoken word.</p>
                                     </div>
                                     <div class="globe-canvas-container">
                                         <canvas id="threejs-canvas"></canvas>
@@ -785,7 +862,7 @@ function createVoiceInterface() {
                                 <div class="vapi-interface-panel">
                                     <div class="vapi-header">
                                         <h4><i class="fas fa-robot"></i> Voice AI Agent</h4>
-                                        <p>Click to interact with the AI assistant</p>
+                                        <p>Talk naturally, and let your AI handle the rest. Click 'Talk to Vapi' to start...</p>
                                     </div>
                                     <div class="vapi-container">
                                         <!-- VAPI iframe will be embedded here by setupVAPIInterface() -->
@@ -1022,6 +1099,31 @@ function initializeClickInterface() {
             item.classList.toggle('selected');
         });
     });
+
+    // Auto-format phone input (US style) in Step 4
+    const phoneInput = document.querySelector('.form-step[data-step="4"] input[type="tel"]');
+    if (phoneInput && !phoneInput.dataset.boundFormat) {
+        phoneInput.dataset.boundFormat = '1';
+        phoneInput.addEventListener('input', (e) => {
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 11); // allow leading 1
+            let formatted = '';
+            if (digits.startsWith('1')) {
+                const rest = digits.slice(1);
+                if (rest.length > 0) {
+                    formatted = `+1 (${rest.slice(0,3)}`;
+                    if (rest.length >= 3) formatted += `) ${rest.slice(3,6)}`;
+                    if (rest.length >= 6) formatted += `-${rest.slice(6,10)}`;
+                } else {
+                    formatted = '+1 ';
+                }
+            } else {
+                if (digits.length > 0) formatted = `+1 (${digits.slice(0,3)}`;
+                if (digits.length >= 3) formatted += `) ${digits.slice(3,6)}`;
+                if (digits.length >= 6) formatted += `-${digits.slice(6,10)}`;
+            }
+            e.target.value = formatted;
+        });
+    }
     
     // Initialize navigation
     updateStepNavigation();
@@ -1030,7 +1132,7 @@ function initializeClickInterface() {
 function initializeTypeInterface() {
     // Simulate AI initialization
     setTimeout(() => {
-        showAIMessage("Hello! I'm your AI assistant. I'm here to help you set up your AI transformation journey. What would you like to know about our services?");
+        showAIMessage("Welcome to the future! I'm your AI assistant, here to help you with your AI journey. Where would you like to begin?");
         enableChatInput();
     }, 2000);
 }
@@ -1450,12 +1552,29 @@ async function initializeVapiSDK() {
         
         vapiInstance.on('error', (error) => {
             console.error('VAPI Error:', error);
-            updateVoiceStatus('Voice error - please try again');
-            setTimeout(() => {
-                updateVoiceStatus('Click the orb to start voice conversation');
-                const voiceOrb = document.getElementById('voiceOrb');
-                voiceOrb?.classList.remove('active');
-            }, 3000);
+            
+            // Better error handling for reconnection issues
+            if (error.message && error.message.includes('connection')) {
+                updateVoiceStatus('Connection lost - attempting to reconnect...');
+                
+                // Attempt automatic reconnection after a delay
+                setTimeout(() => {
+                    try {
+                        updateVoiceStatus('Voice AI ready - click to start conversation');
+                        const voiceOrb = document.getElementById('voiceOrb');
+                        voiceOrb?.classList.remove('active');
+                    } catch (reconnectError) {
+                        console.log('Reconnection attempt completed');
+                    }
+                }, 2000);
+            } else {
+                updateVoiceStatus('Voice temporarily unavailable - please try again');
+                setTimeout(() => {
+                    updateVoiceStatus('Voice AI ready - click to start conversation');
+                    const voiceOrb = document.getElementById('voiceOrb');
+                    voiceOrb?.classList.remove('active');
+                }, 3000);
+            }
         });
         
         // Initialize UI
@@ -3168,6 +3287,13 @@ function submitClickForm() {
     
     console.log('Real estate form submitted:', formData);
     showFormCompletion('click', formData);
+    // After showing completion, send user back to main landing page hero
+    setTimeout(() => {
+        // Close modal if open and restore page
+        closeTimeReveal();
+        // Scroll to top/hero
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 3000);
 }
 
 // TYPE INTERFACE FUNCTIONS
@@ -5667,10 +5793,47 @@ function initializeScrollEffects() {
 function initializeMobileMenu() {
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
+    const navbar = document.querySelector('.navbar');
     
     if (mobileMenuBtn && navLinks) {
-        mobileMenuBtn.addEventListener('click', () => {
+        // Toggle mobile menu
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             navLinks.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+            
+            // Haptic feedback on mobile
+            if (isTouchDevice() && navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        });
+        
+        // Close menu when clicking on nav links
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navbar.contains(e.target)) {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            }
+        });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            }
         });
     }
 }
