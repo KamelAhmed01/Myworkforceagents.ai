@@ -262,6 +262,10 @@ function selectCard(cardType) {
     // Update button text to show loading
     const button = gameCard.querySelector('.btn-select');
     const originalText = button.innerHTML;
+    // Persist original label on the card for later restore
+    if (!gameCard.dataset.originalLabel) {
+        gameCard.dataset.originalLabel = originalText;
+    }
     button.innerHTML = 'Loading... <i class="fas fa-spinner fa-spin"></i>';
     
     // Disable button to prevent multiple clicks
@@ -271,15 +275,133 @@ function selectCard(cardType) {
     // Create dramatic effect
     createCardSelectionEffect(gameCard);
     
-    // Adjust timing for mobile devices (slightly faster for better UX)
-    const delay = isMobile() ? 800 : 1200;
-    
-    // Start infinity zoom transition after a brief moment
+    // Show loading screen after a brief moment
     setTimeout(() => {
-        // Remove pending state before transition
+        showCardLoadingScreen(cardType);
+    }, 600);
+}
+
+// Show loading screen between card selection and interface transition
+function showCardLoadingScreen(cardType) {
+    console.log(`🔄 Showing loading screen for: ${cardType}`);
+    
+    // Remove pending state from card
+    const gameCard = document.querySelector(`[data-card="${cardType}"]`);
+    if (gameCard) {
         gameCard.classList.remove('pending');
-        startInfinityToHourglassTransition(cardType);
-    }, delay);
+    }
+    
+    // Create loading screen
+    const loadingScreen = document.createElement('div');
+    loadingScreen.className = 'card-loading-screen';
+    loadingScreen.id = 'cardLoadingScreen';
+    
+    // Get card info for personalized loading
+    const cardInfo = getCardInfo(cardType);
+    
+    loadingScreen.innerHTML = `
+        <div class="card-loading-content">
+            <div class="card-loading-icon">
+                <i class="${cardInfo.icon}"></i>
+            </div>
+            <h2 class="card-loading-title">${cardInfo.title}</h2>
+            <p class="card-loading-message">${cardInfo.message}</p>
+            <div class="card-loading-progress">
+                <div class="card-loading-progress-bar"></div>
+            </div>
+            <div class="card-loading-status">Preparing your experience...</div>
+        </div>
+    `;
+    
+    document.body.appendChild(loadingScreen);
+    
+    // Prevent body scrolling while loading
+    document.body.classList.add('loading-active');
+    
+    // Simulate loading progress with status updates
+    const statusElement = loadingScreen.querySelector('.card-loading-status');
+    const statusMessages = [
+        'Initializing AI systems...',
+        'Loading interface components...',
+        'Preparing your workspace...',
+        'Almost ready...'
+    ];
+    
+    let messageIndex = 0;
+    const statusInterval = setInterval(() => {
+        if (messageIndex < statusMessages.length) {
+            statusElement.textContent = statusMessages[messageIndex];
+            messageIndex++;
+        } else {
+            clearInterval(statusInterval);
+            // Complete loading and transition to interface
+            setTimeout(() => {
+                completeCardLoading(cardType, loadingScreen);
+            }, 800);
+        }
+    }, 800);
+}
+
+// Get card information for personalized loading
+function getCardInfo(cardType) {
+    const cardInfo = {
+        click: {
+            icon: 'fas fa-mouse-pointer',
+            title: 'Interactive Experience',
+            message: 'Setting up your visual AI workflow interface with point-and-click controls.'
+        },
+        type: {
+            icon: 'fas fa-keyboard',
+            title: 'Text Experience',
+            message: 'Preparing your instant messaging AI assistant for text-based communication.'
+        },
+        voice: {
+            icon: 'fas fa-microphone',
+            title: 'Voice Experience',
+            message: 'Initializing your hands-free voice AI interface with real-time conversation.'
+        }
+    };
+    
+    return cardInfo[cardType] || cardInfo.click;
+}
+
+// Complete loading and transition to interface
+function completeCardLoading(cardType, loadingScreen) {
+    console.log(`✅ Loading complete for: ${cardType}`);
+    
+    // Fade out loading screen
+    loadingScreen.style.transition = 'opacity 0.5s ease-out';
+    loadingScreen.style.opacity = '0';
+    
+    setTimeout(() => {
+        // Remove loading screen
+        loadingScreen.remove();
+        
+        // Re-enable body scrolling
+        document.body.classList.remove('loading-active');
+        
+        // Skip the old 3-second animation and go directly to interface
+        navigateToFormInterfaceDirect(cardType);
+    }, 500);
+}
+
+// Direct interface navigation without old overlay system
+function navigateToFormInterfaceDirect(cardType) {
+    console.log(`🚀 Direct navigation to ${cardType} interface...`);
+    
+    // Hide original content first (blur background)
+    hideOriginalContent();
+    
+    // Small delay to let blur effect settle, then show interface
+    setTimeout(() => {
+        // Restore background but keep it dimmed
+        restoreBackgroundForForm();
+        
+        // Create and show the specific form interface
+        createFormInterface(cardType);
+        
+        // Note: Global time tracking already started on page load
+    }, 300);
 }
 
 // Enhanced infinity-to-hourglass transition with real estate themed cinematic effects
@@ -609,6 +731,11 @@ function createClickInterface() {
                     <h2>Interactive Experience Setup</h2>
                     <p>Configure your AI workflow through visual selection</p>
                 </div>
+                <div class="form-controls">
+                    <button class="close-btn" onclick="closeFormInterface()" title="Exit to card selection">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="visual-form-grid">
@@ -815,8 +942,15 @@ function createVoiceInterface() {
         <div class="voice-form-container">
             <div class="voice-interface">
                 <div class="voice-header">
-                    <h2>AI Voice Assistant with Hands‑free control and real‑time voice interaction for your AI team.</h2>
-                    <p>Talk naturally, and let your AI handle the rest.</p>
+                    <div class="voice-header-content">
+                        <h2>AI Voice Assistant with Hands‑free control and real‑time voice interaction for your AI team.</h2>
+                        <p>Talk naturally, and let your AI handle the rest.</p>
+                    </div>
+                    <div class="voice-header-controls">
+                        <button class="close-btn" onclick="closeFormInterface()" title="Exit to card selection">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="voice-layout">
@@ -3156,18 +3290,75 @@ function toggleFullscreen() {
 }
 
 function closeFormInterface() {
+    console.log('🚪 Closing form interface...');
+    
     const formInterface = document.getElementById('activeFormInterface');
     if (formInterface) {
+        // Smoothly fade out the interface
         formInterface.classList.remove('interface-active');
         
         setTimeout(() => {
-            // Complete cleanup of everything
-            cleanupAllWarpElements();
-        }, 500);
+            // Remove the interface
+            formInterface.remove();
+            
+            // Simple cleanup without triggering loading effects
+            simpleInterfaceCleanup();
+        }, 300);
     } else {
-        // If no form interface found, still do cleanup
-        cleanupAllWarpElements();
+        console.log('⚠️ No active form interface found');
     }
+}
+
+// Simple cleanup function that doesn't trigger loading effects
+function simpleInterfaceCleanup() {
+    console.log('🧹 Performing simple interface cleanup...');
+    
+    // Remove any remaining form interfaces
+    const remainingInterfaces = document.querySelectorAll('.form-interface');
+    remainingInterfaces.forEach(interface => interface.remove());
+    
+    // Restore page elements to original state (without complex cleanup)
+    const hero = document.querySelector('.hero');
+    const navbar = document.querySelector('.navbar');
+    const meetSection = document.querySelector('#meet-section');
+    const aiStorySection = document.querySelector('#ai-story');
+    
+    const elementsToRestore = [hero, navbar, meetSection, aiStorySection];
+    
+    elementsToRestore.forEach(element => {
+        if (element) {
+            element.style.filter = '';
+            element.style.opacity = '';
+            element.style.transition = '';
+            element.style.willChange = '';
+        }
+    });
+    
+    // Re-enable body scrolling if it was disabled
+    document.body.classList.remove('loading-active');
+    document.body.style.overflow = '';
+    
+    // Reset cards to original state
+    resetAllCards();
+    
+    // Reset any global states
+    if (window.currentStep) {
+        window.currentStep = 1;
+    }
+    
+    // Clear any remaining timers or intervals
+    if (window.timerInterval) {
+        clearInterval(window.timerInterval);
+        window.timerInterval = null;
+    }
+    
+    // Remove any remaining loading screens (safety check)
+    const loadingScreen = document.getElementById('cardLoadingScreen');
+    if (loadingScreen) {
+        loadingScreen.remove();
+    }
+    
+    console.log('✅ Interface cleanup complete - returned to card selection');
 }
 
 // CLICK INTERFACE FUNCTIONS
@@ -4098,12 +4289,38 @@ function confirmCardSelection(cardType) {
 }
 
 function resetAllCards() {
+    // Support both legacy structure (.card-container .card) and current structure (.game-card)
+    const gameCards = document.querySelectorAll('.game-card');
+    if (gameCards.length) {
+        gameCards.forEach(card => {
+            // Remove selection/loading/flip states
+            card.classList.remove('selected', 'pending', 'flipped');
+            const inner = card.querySelector('.card-inner');
+            if (inner) inner.style.transform = '';
+            // Restore button state
+            const btn = card.querySelector('.btn-select');
+            if (btn) {
+                btn.disabled = false;
+                btn.style.pointerEvents = '';
+                const original = card.dataset.originalLabel || 'Select <i class="fas fa-arrow-right"></i>';
+                btn.innerHTML = original;
+            }
+        });
+    }
+
+    // Fallback for older DOM structure
     const containers = document.querySelectorAll('.card-container');
     containers.forEach(container => {
         const card = container.querySelector('.card');
-        card.classList.remove('flipped');
+        if (card) card.classList.remove('flipped');
         container.classList.remove('flipped');
         container.classList.remove('selected');
+        const btn = container.querySelector('.btn-select');
+        if (btn) {
+            btn.disabled = false;
+            btn.style.pointerEvents = '';
+            btn.innerHTML = 'Select <i class="fas fa-arrow-right"></i>';
+        }
     });
 }
 
