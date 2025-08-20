@@ -4337,15 +4337,21 @@ body.loading-active {
 
 /* Vapi embed panel and voice instructions removed */
 
-/* Enhanced Voice Interface - Globe Centered */
+/* Enhanced Voice Interface - Layered Structure */
 .enhanced-voice-interface {
-    background: radial-gradient(ellipse at center, 
-        rgba(15, 15, 35, 0.98) 0%, 
-        rgba(0, 0, 0, 0.95) 70%);
-    padding: 40px;
-    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(0, 10, 20, 0.95) 0%, 
+        rgba(0, 20, 40, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.2);
     display: flex;
     flex-direction: column;
+    z-index: 10000;
 }
 
 .voice-header {
@@ -4382,17 +4388,72 @@ body.loading-active {
     gap: 10px;
 }
 
-/* Centered Voice Layout */
+/* Centered Voice Layout - Layered Container */
 .centered-voice-layout {
+    position: relative;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
     width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* VAPI Base Layer - Full Interface Background */
+.vapi-base-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transition: filter 0.5s ease;
+}
+
+.vapi-base-layer.blurred {
+    filter: blur(10px);
+    opacity: 0.3;
+}
+
+.vapi-base-layer iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+}
+
+/* Globe Overlay Layer - Centered (Moved Up) */
+.globe-overlay-layer {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    pointer-events: none; /* Allow clicks to pass through to iframe */
+    opacity: 0.8;
+    transition: all 0.5s ease;
+}
+
+.globe-overlay-layer.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Transcript Overlay Layer - Bottom Centered */
+.transcript-overlay-layer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1000px;
+    z-index: 10;
+    opacity: 0.9;
+    transition: all 0.5s ease;
+}
+
+.transcript-overlay-layer.active {
+    opacity: 1;
 }
 
 /* Main Globe Container - Large and Centered */
@@ -4404,6 +4465,7 @@ body.loading-active {
     display: flex;
     align-items: center;
     justify-content: center;
+    aspect-ratio: 1 / 1; /* Ensure perfect square/circle */
 }
 
 .globe-status-overlay {
@@ -4451,29 +4513,25 @@ body.loading-active {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid rgba(0, 212, 255, 0.3);
+    /* Removed border to eliminate double circle effect */
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: pointer;
+    /* Removed cursor: pointer since globe is not clickable anymore */
 }
 
 .interactive-globe-wrapper.inactive {
-    border-color: rgba(128, 128, 128, 0.5);
     filter: grayscale(0.7) brightness(0.6);
 }
 
 .interactive-globe-wrapper.active {
-    border-color: rgba(0, 212, 255, 0.8);
     filter: none;
     box-shadow: 
         0 0 50px rgba(0, 212, 255, 0.4),
         inset 0 0 50px rgba(0, 212, 255, 0.1);
 }
 
-.interactive-globe-wrapper:hover {
-    transform: scale(1.02);
-    border-color: rgba(0, 212, 255, 0.6);
-}
+/* Removed hover effect since globe is no longer clickable */
+/* .interactive-globe-wrapper:hover { ... } */
 
 /* Globe Canvas Container */
 .globe-canvas-container {
@@ -4483,15 +4541,18 @@ body.loading-active {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at center, 
-        rgba(0, 20, 40, 0.9) 0%, 
-        rgba(0, 10, 20, 0.95) 100%);
+    background: transparent; /* Transparent background like PNG */
+    aspect-ratio: 1 / 1; /* Ensure perfect circle */
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 #threejs-canvas {
     width: 100% !important;
     height: 100% !important;
     border-radius: 50%;
+    aspect-ratio: 1 / 1; /* Ensure perfect circle */
+    object-fit: cover; /* Maintain aspect ratio */
 }
 
 /* Globe Activation Overlay */
@@ -4549,6 +4610,48 @@ body.loading-active {
     border-radius: 15px;
     border: 1px solid rgba(0, 212, 255, 0.2);
     backdrop-filter: blur(10px);
+}
+
+.vapi-interface-panel {
+    width: 100%;
+}
+
+.vapi-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.vapi-header h4 {
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.vapi-header i {
+    color: var(--accent-color);
+}
+
+.vapi-header p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.vapi-container {
+    width: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .vapi-embed-container iframe {

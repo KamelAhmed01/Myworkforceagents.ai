@@ -944,7 +944,7 @@ function createVoiceInterface() {
                 <div class="voice-header">
                     <div class="voice-header-content">
                         <h2>AI Voice Assistant</h2>
-                        <p>Click the globe to start a natural conversation with your AI team</p>
+                        <p>Click the interface below to activate the globe and start your conversation</p>
                     </div>
                     <div class="voice-header-controls">
                         <button class="close-btn" onclick="closeFormInterface()" title="Exit to card selection">
@@ -954,59 +954,66 @@ function createVoiceInterface() {
                 </div>
                 
                 <div class="centered-voice-layout">
-                    <!-- Main Globe Interface - Large and Centered -->
-                    <div class="main-globe-container">
-                        <div class="globe-status-overlay" id="globeStatusOverlay">
-                            <div class="status-indicator">
-                                <div class="status-dot inactive" id="globeStatusDot"></div>
-                                <span id="globeStatusText">Click the globe to start</span>
-                            </div>
-                        </div>
-                        
-                        <div class="interactive-globe-wrapper" id="interactiveGlobe">
-                            <div class="globe-canvas-container">
-                                <canvas id="threejs-canvas"></canvas>
-                                <div class="globe-activation-overlay" id="globeActivationOverlay">
-                                    <div class="activation-button" onclick="activateVoiceGlobe()">
-                                        <i class="fas fa-microphone"></i>
-                                        <span>Click to Activate</span>
-                                    </div>
+                    <!-- VAPI Iframe - Base Layer (Full Interface) -->
+                    <div class="vapi-base-layer" id="vapiBaseLayer">
+                        <iframe 
+                            id="vapiEmbeddedFrame"
+                            src="https://vapi.ai?demo=true&shareKey=${VAPI_CONFIG.publicKey}&assistantId=${VAPI_CONFIG.assistantId}&embed=true&minimal=true"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            allow="microphone; camera; autoplay; fullscreen"
+                            sandbox="allow-scripts allow-same-origin allow-microphone allow-forms allow-popups"
+                            onload="setupVapiFrameActivation(this)">
+                        </iframe>
+                    </div>
+
+                    <!-- Globe Layer - Centered Over Iframe -->
+                    <div class="globe-overlay-layer" id="globeOverlayLayer">
+                        <div class="main-globe-container">
+                            <div class="globe-status-overlay" id="globeStatusOverlay">
+                                <div class="status-indicator">
+                                    <div class="status-dot inactive" id="globeStatusDot"></div>
+                                    <span id="globeStatusText">Press the interface to start</span>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- VAPI Widget Integration - Hidden Initially -->
-                        <div class="vapi-widget-container" id="vapiWidgetContainer" style="display: none;">
-                            <div id="vapi-web-widget"></div>
+                            
+                            <div class="interactive-globe-wrapper" id="interactiveGlobe">
+                                <div class="globe-canvas-container">
+                                    <canvas id="threejs-canvas"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Enhanced Transcription Panel - Bottom -->
-                    <div class="bottom-transcription-panel">
-                        <div class="transcription-header">
-                            <div class="transcription-title">
-                                <i class="fas fa-closed-captioning"></i>
-                                <h4>Live Conversation</h4>
-                            </div>
-                            <div class="transcription-controls">
-                                <button class="transcription-toggle-btn" id="transcriptionToggleBtn" onclick="toggleTranscription()">
-                                    <i class="fas fa-microphone"></i>
-                                    <span>Start Transcription</span>
-                                </button>
-                                <button class="clear-transcript-btn" onclick="clearTranscription()">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Clear</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="transcription-content" id="transcriptionContent">
-                            <div class="transcript-placeholder">
-                                <div class="placeholder-icon">
-                                    <i class="fas fa-comment-dots"></i>
+                    <!-- Transcript Layer - Bottom Over Iframe -->
+                    <div class="transcript-overlay-layer" id="transcriptOverlayLayer">
+                        <div class="bottom-transcription-panel">
+                            <div class="transcription-header">
+                                <div class="transcription-title">
+                                    <i class="fas fa-closed-captioning"></i>
+                                    <h4>Live Conversation</h4>
                                 </div>
-                                <p>Your conversation will appear here</p>
-                                <small>Click the globe above to start talking</small>
+                                <div class="transcription-controls">
+                                    <button class="transcription-toggle-btn" id="transcriptionToggleBtn" onclick="toggleTranscription()">
+                                        <i class="fas fa-microphone"></i>
+                                        <span>Start Transcription</span>
+                                    </button>
+                                    <button class="clear-transcript-btn" onclick="clearTranscription()">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Clear</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="transcription-content" id="transcriptionContent">
+                                <div class="transcript-placeholder">
+                                    <div class="placeholder-icon">
+                                        <i class="fas fa-comment-dots"></i>
+                                    </div>
+                                    <p>Your conversation will appear here</p>
+                                    <small>Press the interface to start talking</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1290,11 +1297,15 @@ async function initializeCenteredGlobe() {
         return;
     }
     
-    // Set canvas to larger size for centered layout
+    // Set canvas to perfectly circular dimensions for centered layout
     canvas.style.width = '400px';
     canvas.style.height = '400px';
     canvas.width = 400;
     canvas.height = 400;
+    
+    // Ensure perfect circle with equal width and height
+    canvas.style.aspectRatio = '1 / 1';
+    canvas.style.borderRadius = '50%';
     
     if (!window.THREE) {
         console.error('❌ Three.js not loaded');
@@ -3418,6 +3429,61 @@ window.toggleBackupInterface = function() {
 }
 
 // Activate voice globe when clicked
+// Setup VAPI frame activation - triggered by iframe interaction
+function setupVapiFrameActivation(iframe) {
+    console.log('🎯 Setting up VAPI iframe activation...');
+    
+    // Listen for iframe interaction/loading to activate globe
+    iframe.addEventListener('load', () => {
+        console.log('📱 VAPI iframe loaded');
+        
+        // Set up message listener for iframe events
+        window.addEventListener('message', (event) => {
+            // Only process messages from VAPI domain
+            if (event.origin === 'https://vapi.ai' || event.origin.includes('vapi')) {
+                console.log('📞 VAPI iframe event:', event.data);
+                
+                // Activate globe when VAPI starts
+                if (event.data.type === 'call-start' || event.data.event === 'call-start') {
+                    setGlobeState('active');
+                    updateGlobeStatus('Voice call active');
+                    startTranscription();
+                }
+                
+                // Deactivate globe when VAPI ends
+                if (event.data.type === 'call-end' || event.data.event === 'call-end') {
+                    setGlobeState('inactive');
+                    updateGlobeStatus('Use interface below to start');
+                }
+                
+                // Handle speech events
+                if (event.data.type === 'speech-start' || event.data.event === 'speech-start') {
+                    updateGlobeStatus('Listening...');
+                }
+                
+                if (event.data.type === 'speech-end' || event.data.event === 'speech-end') {
+                    updateGlobeStatus('Processing...');
+                }
+                
+                // Handle AI response transcription
+                if (event.data.type === 'message' || event.data.event === 'message') {
+                    const transcript = event.data.text || event.data.message || '';
+                    if (transcript && event.data.role === 'assistant') {
+                        addTranscriptMessage('AI Agent', transcript, 'ai');
+                    }
+                }
+            }
+        });
+    });
+    
+    // Also activate globe on any iframe click/interaction
+    iframe.addEventListener('click', () => {
+        console.log('🖱️ VAPI iframe clicked - activating globe');
+        setGlobeState('active');
+        updateGlobeStatus('Connecting...');
+    });
+}
+
 async function activateVoiceGlobe() {
     console.log('🎯 Globe activation requested...');
     
@@ -3733,8 +3799,105 @@ function updateTranscriptionUI(active) {
     }
 }
 
+// Setup VAPI iframe activation with blur effects
+function setupVapiFrameActivation(iframe) {
+    console.log('🔧 Setting up VAPI iframe activation...');
+    
+    // Listen for messages from the iframe (VAPI events)
+    window.addEventListener('message', function(event) {
+        // Check if message is from VAPI iframe
+        if (event.source === iframe.contentWindow) {
+            console.log('📨 Received VAPI message:', event.data);
+            
+            // Handle VAPI call start
+            if (event.data.type === 'call-start' || event.data.includes('call-start')) {
+                activateLayeredInterface();
+            }
+            
+            // Handle VAPI call end
+            if (event.data.type === 'call-end' || event.data.includes('call-end')) {
+                deactivateLayeredInterface();
+            }
+        }
+    });
+    
+    // Also listen for iframe interaction (click/focus)
+    iframe.addEventListener('load', function() {
+        console.log('✅ VAPI iframe loaded successfully');
+        
+        // Try to detect when user interacts with iframe
+        iframe.contentWindow.addEventListener('click', function() {
+            console.log('🖱️ VAPI iframe clicked');
+            setTimeout(() => {
+                activateLayeredInterface();
+            }, 500); // Small delay for VAPI to initialize
+        }, true);
+    });
+}
+
+// Activate the layered interface (blur iframe, show globe/transcript)
+function activateLayeredInterface() {
+    console.log('🎯 Activating layered voice interface...');
+    
+    const vapiLayer = document.getElementById('vapiBaseLayer');
+    const globeLayer = document.getElementById('globeOverlayLayer');
+    const transcriptLayer = document.getElementById('transcriptOverlayLayer');
+    
+    // Blur the iframe
+    if (vapiLayer) {
+        vapiLayer.classList.add('blurred');
+    }
+    
+    // Activate globe and transcript overlays
+    if (globeLayer) {
+        globeLayer.classList.add('active');
+    }
+    
+    if (transcriptLayer) {
+        transcriptLayer.classList.add('active');
+    }
+    
+    // Start globe and transcription
+    setGlobeState('active');
+    startTranscription();
+    
+    console.log('✅ Layered interface activated');
+}
+
+// Deactivate the layered interface (restore iframe, hide overlays)
+function deactivateLayeredInterface() {
+    console.log('⏹️ Deactivating layered voice interface...');
+    
+    const vapiLayer = document.getElementById('vapiBaseLayer');
+    const globeLayer = document.getElementById('globeOverlayLayer');
+    const transcriptLayer = document.getElementById('transcriptOverlayLayer');
+    
+    // Restore iframe
+    if (vapiLayer) {
+        vapiLayer.classList.remove('blurred');
+    }
+    
+    // Deactivate overlays
+    if (globeLayer) {
+        globeLayer.classList.remove('active');
+    }
+    
+    if (transcriptLayer) {
+        transcriptLayer.classList.remove('active');
+    }
+    
+    // Stop globe and transcription
+    setGlobeState('inactive');
+    stopTranscription();
+    
+    console.log('✅ Layered interface deactivated');
+}
+
 // Make functions globally available
 window.activateVoiceGlobe = activateVoiceGlobe;
+window.setupVapiFrameActivation = setupVapiFrameActivation;
+window.activateLayeredInterface = activateLayeredInterface;
+window.deactivateLayeredInterface = deactivateLayeredInterface;
 window.addTranscriptMessage = addTranscriptMessage;
 
 function showVoiceCompletion() {
