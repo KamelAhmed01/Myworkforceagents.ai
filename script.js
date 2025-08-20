@@ -940,11 +940,11 @@ function createTypeInterface() {
 function createVoiceInterface() {
     return `
         <div class="voice-form-container">
-            <div class="voice-interface">
+            <div class="enhanced-voice-interface">
                 <div class="voice-header">
                     <div class="voice-header-content">
-                        <h2>AI Voice Assistant with Hands‑free control and real‑time voice interaction for your AI team.</h2>
-                        <p>Talk naturally, and let your AI handle the rest.</p>
+                        <h2>AI Voice Assistant</h2>
+                        <p>Click the globe to start a natural conversation with your AI team</p>
                     </div>
                     <div class="voice-header-controls">
                         <button class="close-btn" onclick="closeFormInterface()" title="Exit to card selection">
@@ -953,96 +953,87 @@ function createVoiceInterface() {
                     </div>
                 </div>
                 
-                <div class="voice-layout">
-                    <div class="vapi-voice-panel">
-                        <div class="voice-controls">
-                            <div class="voice-status">
-                                <div class="status-indicator">
-                                    <div class="status-dot"></div>
-                                    <span>Voice Agent Ready</span>
-                                </div>
+                <div class="centered-voice-layout">
+                    <!-- Main Globe Interface - Large and Centered -->
+                    <div class="main-globe-container">
+                        <div class="globe-status-overlay" id="globeStatusOverlay">
+                            <div class="status-indicator">
+                                <div class="status-dot inactive" id="globeStatusDot"></div>
+                                <span id="globeStatusText">Click the globe to start</span>
                             </div>
                         </div>
                         
-                        <!-- Side-by-Side Voice AI Interface -->
-                        <div class="side-by-side-voice-interface" id="voiceInterface">
-                            <div class="voice-interface-header">
-                                <h3>AI Voice Assistant</h3>
-                                <p>Interactive voice AI with real-time 3D globe visualization</p>
-                            </div>
-                            
-                            <!-- Side-by-side container -->
-                            <div class="voice-interface-grid">
-                                <!-- 3D Globe Visualizer -->
-                                <div class="globe-visualizer-panel">
-                                    <div class="visualizer-header">
-                                        <h4><i class="fas fa-globe"></i> Audio Globe: Visualize the conversation in real time.</h4>
-                                        <p>Watch the 3D globe react dynamically to every spoken word.</p>
-                                    </div>
-                                    <div class="globe-canvas-container">
-                                        <canvas id="threejs-canvas"></canvas>
-                                        <!-- Removed globe status overlay for cleaner look -->
-                                    </div>
-                                    <div class="globe-controls">
-                                        <button class="globe-btn active" id="toggleGlobeBtn" onclick="toggleAudioGlobe()">
-                                            <i class="fas fa-stop"></i>
-                                            <span>Stop Globe</span>
-                                        </button>
-                                        <p class="globe-info">Wave effects responding to audio</p>
-                                    </div>
-                                </div>
-                                
-                                <!-- VAPI Interface Panel -->
-                                <div class="vapi-interface-panel">
-                                    <div class="vapi-header">
-                                        <h4><i class="fas fa-robot"></i> Voice AI Agent</h4>
-                                        <p>Talk naturally, and let your AI handle the rest. Click 'Talk to Vapi' to start...</p>
-                                    </div>
-                                    <div class="vapi-container">
-                                        <!-- VAPI iframe will be embedded here by setupVAPIInterface() -->
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Real-time Transcription (Full Width) -->
-                            <div class="transcription-container" id="transcriptionContainer">
-                                <div class="transcription-header">
-                                    <h4><i class="fas fa-closed-captioning"></i> Live Transcription</h4>
-                                    <div class="transcription-controls">
-                                        <button class="clear-transcript-btn" onclick="clearTranscription()">
-                                            <i class="fas fa-trash"></i>
-                                            Clear
-                                        </button>
-                                        <button class="transcription-toggle-btn" onclick="toggleTranscription()">
-                                            <i class="fas fa-microphone"></i>
-                                            Start Listening
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="transcription-content" id="transcriptionContent">
-                                    <div class="transcript-placeholder">
-                                        <i class="fas fa-comment-dots"></i>
-                                        <p>Click "Start Listening" to begin transcription...</p>
+                        <div class="interactive-globe-wrapper" id="interactiveGlobe">
+                            <div class="globe-canvas-container">
+                                <canvas id="threejs-canvas"></canvas>
+                                <div class="globe-activation-overlay" id="globeActivationOverlay">
+                                    <div class="activation-button" onclick="activateVoiceGlobe()">
+                                        <i class="fas fa-microphone"></i>
+                                        <span>Click to Activate</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="voice-instructions">
-                            <div class="instruction-content">
-                                <h4>How to Use Voice Assistant:</h4>
-                                <ol>
-                                    <li>The globe automatically shows wave and ripple effects</li>
-                                    <li>Use the VAPI interface on the right to interact with the AI agent</li>
-                                    <li>Click "Start Listening" to enable real-time transcription</li>
-                                    <li>Speak and watch waves ripple across the globe surface</li>
-                                    <li>View conversation transcripts in the panel below</li>
-                                </ol>
-                                <p><i class="fas fa-info-circle"></i> The 3D globe creates dynamic wave patterns that respond to audio in real-time. VAPI provides the actual AI conversation while waves visualize your voice.</p>
+                        <!-- VAPI Widget Integration - Hidden Initially -->
+                        <div class="vapi-widget-container" id="vapiWidgetContainer" style="display: none;">
+                            <div id="vapi-web-widget"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Enhanced Transcription Panel - Bottom -->
+                    <div class="bottom-transcription-panel">
+                        <div class="transcription-header">
+                            <div class="transcription-title">
+                                <i class="fas fa-closed-captioning"></i>
+                                <h4>Live Conversation</h4>
+                            </div>
+                            <div class="transcription-controls">
+                                <button class="transcription-toggle-btn" id="transcriptionToggleBtn" onclick="toggleTranscription()">
+                                    <i class="fas fa-microphone"></i>
+                                    <span>Start Transcription</span>
+                                </button>
+                                <button class="clear-transcript-btn" onclick="clearTranscription()">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Clear</span>
+                                </button>
                             </div>
                         </div>
                         
-
+                        <div class="transcription-content" id="transcriptionContent">
+                            <div class="transcript-placeholder">
+                                <div class="placeholder-icon">
+                                    <i class="fas fa-comment-dots"></i>
+                                </div>
+                                <p>Your conversation will appear here</p>
+                                <small>Click the globe above to start talking</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Voice Pipeline Configuration -->
+                <div class="voice-pipeline-config" style="display: none;">
+                    <div class="pipeline-settings">
+                        <h4>Voice Configuration</h4>
+                        <div class="config-options">
+                            <div class="config-item">
+                                <label>Response Speed:</label>
+                                <select id="responseSpeed">
+                                    <option value="fast">Fast (Gaming/Real-time)</option>
+                                    <option value="balanced" selected>Balanced (Standard)</option>
+                                    <option value="careful">Careful (Healthcare/Formal)</option>
+                                </select>
+                            </div>
+                            <div class="config-item">
+                                <label>Interruption Sensitivity:</label>
+                                <select id="interruptionSensitivity">
+                                    <option value="low">Low (Conservative)</option>
+                                    <option value="medium" selected>Medium (Balanced)</option>
+                                    <option value="high">High (Very Responsive)</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1272,46 +1263,215 @@ function initializeTypeInterface() {
 }
 
 async function initializeVoiceInterface() {
-    console.log('🎤 Initializing Voice Interface (called from card selection)...');
+    console.log('🎤 Initializing Enhanced Voice Interface...');
     
-    // Set initial status
-    updateVoiceStatus('Loading voice AI...');
+    // Initialize the centered globe with inactive state
+    await initializeCenteredGlobe();
     
-    // Initialize our proper voice interface with 3D globe and VAPI
-    console.log('🚀 Calling initVoiceInterface for full setup...');
-    initVoiceInterface();
+    // Setup VAPI Web SDK with best practices
+    setupVAPIWebSDK();
     
-    // Load Vapi widget script (keeping for compatibility)
-    loadVapiScript();
+    // Initialize transcription system
+    initializeTranscriptionSystem();
     
-    // Initialize audio visualizer after a short delay (keeping for compatibility)
-    setTimeout(() => {
-        initializeAudioVisualizer();
-    }, 1000);
+    // Set initial state - globe grey and inactive
+    setGlobeState('inactive');
     
-    // Set a fallback timeout in case VAPI fails to load completely
-    setTimeout(() => {
-        if (!vapiInstance) {
-            console.log('⏱️ VAPI loading timeout - ensuring voice interface is ready');
-            updateVoiceStatus('Voice AI ready - Use the interface below to start');
+    console.log('✅ Enhanced Voice Interface initialized successfully');
+}
+
+// Initialize the large centered globe in inactive state
+async function initializeCenteredGlobe() {
+    console.log('🌍 Initializing centered globe...');
+    
+    const canvas = document.getElementById('threejs-canvas');
+    if (!canvas) {
+        console.error('❌ Canvas element not found');
+        return;
+    }
+    
+    // Set canvas to larger size for centered layout
+    canvas.style.width = '400px';
+    canvas.style.height = '400px';
+    canvas.width = 400;
+    canvas.height = 400;
+    
+    if (!window.THREE) {
+        console.error('❌ Three.js not loaded');
+        showGlobeError('3D library not available');
+        return;
+    }
+    
+    try {
+        // Create globe instance if not exists
+        if (!audioGlobe3D) {
+            audioGlobe3D = new AudioGlobe3D();
+            const success = await audioGlobe3D.init();
             
-            // Make sure fallback is available
-            const fallbackAddon = document.querySelector('.vapi-fallback-addon');
-            if (!fallbackAddon) {
-                showVapiFallback();
+            if (!success) {
+                console.error('❌ Globe initialization failed');
+                showGlobeError('Globe initialization failed');
+                return;
             }
         }
-    }, 10000); // 10 second timeout
+        
+        // Start globe in inactive mode (grey, no audio processing)
+        await audioGlobe3D.start();
+        setGlobeState('inactive');
+        
+        console.log('✅ Centered globe initialized in inactive state');
+        
+    } catch (error) {
+        console.error('❌ Error initializing globe:', error);
+        showGlobeError('Globe setup error');
+    }
+}
+
+// Setup VAPI Web SDK following best practices
+function setupVAPIWebSDK() {
+    console.log('📞 Setting up VAPI Web SDK...');
     
-    // Add completion button event listener after a short delay
-    setTimeout(() => {
-        const completeBtn = document.querySelector('.complete-voice');
-        if (completeBtn) {
-            completeBtn.addEventListener('click', showVoiceCompletion);
+    // Load VAPI Web SDK script
+    if (!window.Vapi) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@vapi-ai/web@latest';
+        script.type = 'module';
+        
+        script.onload = () => {
+            console.log('✅ VAPI SDK loaded');
+            initializeVapiInstance();
+        };
+        
+        script.onerror = () => {
+            console.warn('⚠️ VAPI SDK failed to load, using fallback');
+            setupVAPIFallback();
+        };
+        
+        document.head.appendChild(script);
+    } else {
+        initializeVapiInstance();
+    }
+}
+
+// Initialize VAPI instance with voice pipeline configuration
+async function initializeVapiInstance() {
+    try {
+        // Create VAPI instance with enhanced configuration
+        const vapiConfig = {
+            ...VAPI_CONFIG,
+            // Voice pipeline configuration following best practices
+            voicePipelineConfig: {
+                startSpeakingPlan: {
+                    smartEndpointingPlan: {
+                        provider: "livekit",
+                        waitFunction: "2000 / (1 + exp(-10 * (x - 0.5)))" // Aggressive for real-time
+                    },
+                    waitSeconds: 0.4
+                },
+                stopSpeakingPlan: {
+                    numWords: 0, // Use VAD for faster interruption
+                    voiceSeconds: 0.2,
+                    backoffSeconds: 1.0
+                }
+            }
+        };
+        
+        // Initialize VAPI (will be loaded when globe is activated)
+        window.vapiInstance = null; // Initialize on demand
+        
+        console.log('✅ VAPI configuration ready');
+        
+    } catch (error) {
+        console.error('❌ Error setting up VAPI:', error);
+        setupVAPIFallback();
+    }
+}
+
+// Fallback for when VAPI SDK fails to load
+function setupVAPIFallback() {
+    console.log('🔄 Setting up VAPI fallback interface...');
+    
+    const container = document.getElementById('vapiWidgetContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="vapi-fallback">
+                <p>Voice AI available in new window</p>
+                <button onclick="openVAPIWindow()" class="vapi-fallback-btn">
+                    <i class="fas fa-microphone"></i>
+                    Open Voice Assistant
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Open VAPI in new window as fallback
+function openVAPIWindow() {
+    const vapiUrl = `https://vapi.ai?demo=true&shareKey=${VAPI_CONFIG.publicKey}&assistantId=${VAPI_CONFIG.assistantId}`;
+    window.open(vapiUrl, 'vapi-voice', 'width=800,height=600,scrollbars=yes');
+}
+
+// Initialize transcription system
+function initializeTranscriptionSystem() {
+    console.log('📝 Initializing transcription system...');
+    
+    // Check for speech recognition support
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.warn('⚠️ Speech recognition not supported');
+        disableTranscription();
+        return;
+    }
+    
+    console.log('✅ Transcription system ready');
+}
+
+// Disable transcription if not supported
+function disableTranscription() {
+    const transcriptionToggle = document.getElementById('transcriptionToggleBtn');
+    if (transcriptionToggle) {
+        transcriptionToggle.disabled = true;
+        transcriptionToggle.innerHTML = '<i class="fas fa-microphone-slash"></i><span>Not Available</span>';
+    }
+}
+
+// Set globe state (inactive/active)
+function setGlobeState(state) {
+    const globe = document.getElementById('interactiveGlobe');
+    const statusDot = document.getElementById('globeStatusDot');
+    const statusText = document.getElementById('globeStatusText');
+    const activationOverlay = document.getElementById('globeActivationOverlay');
+    
+    if (state === 'inactive') {
+        globe?.classList.remove('active');
+        globe?.classList.add('inactive');
+        statusDot?.classList.remove('active');
+        statusDot?.classList.add('inactive');
+        if (statusText) statusText.textContent = 'Click the globe to start';
+        if (activationOverlay) activationOverlay.style.display = 'flex';
+        
+        // Make globe grey and reduce activity
+        if (audioGlobe3D && audioGlobe3D.globeMaterial) {
+            audioGlobe3D.globeMaterial.uniforms.color1.value.set(0.5, 0.5, 0.5); // Grey
+            audioGlobe3D.globeMaterial.uniforms.color2.value.set(0.3, 0.3, 0.3); // Dark grey
+            audioGlobe3D.globeMaterial.uniforms.amplitude.value = 0.01; // Minimal movement
         }
-    }, 1000);
+        
+    } else if (state === 'active') {
+        globe?.classList.remove('inactive');
+        globe?.classList.add('active');
+        statusDot?.classList.remove('inactive');
+        statusDot?.classList.add('active');
+        if (statusText) statusText.textContent = 'Voice AI Active - Speak now';
+        if (activationOverlay) activationOverlay.style.display = 'none';
+        
+        // Restore globe colors and activity
+        if (audioGlobe3D && audioGlobe3D.globeMaterial) {
+            audioGlobe3D.globeMaterial.uniforms.color1.value.set(0.0, 0.8, 1.0); // Blue
+            audioGlobe3D.globeMaterial.uniforms.color2.value.set(0.5, 0.0, 1.0); // Purple
+        }
+    }
     
-    console.log('✅ Voice interface initialization completed');
+    console.log(`🌍 Globe state set to: ${state}`);
 }
 
 // VAPI Configuration
@@ -3068,12 +3228,12 @@ function closeCompletionPopup() {
 
 // Auto-initialize when voice interface is shown
 function initVoiceInterface() {
-    console.log('🎙️ Initializing Voice Interface...');
+    console.log('🎙️ Initializing Enhanced Voice Interface...');
     console.log('🔧 Checking for required elements...');
     
     // Debug: Check if elements exist
     const canvas = document.getElementById('threejs-canvas');
-    const vapiContainer = document.querySelector('.vapi-container');
+    const vapiContainer = document.getElementById('vapiWidgetContainer');
     
     console.log('📋 Element check:', {
         canvas: canvas ? 'Found' : 'Missing',
@@ -3081,14 +3241,10 @@ function initVoiceInterface() {
         threeJS: window.THREE ? 'Loaded' : 'Missing'
     });
     
-    // Initialize 3D Audio Globe
-    console.log('🌍 Starting Audio Globe initialization...');
-    initAudioGlobe();
-    
-    // Setup VAPI interface  
-    console.log('📞 Starting VAPI interface initialization...');
+    // Initialize enhanced voice interface
+    console.log('🌍 Starting Enhanced Voice Interface initialization...');
     setTimeout(() => {
-        setupVAPIInterface();
+        initializeVoiceInterface();
     }, 500);
     
     console.log('✅ Voice interface initialization completed');
@@ -3261,6 +3417,326 @@ window.toggleBackupInterface = function() {
     }
 }
 
+// Activate voice globe when clicked
+async function activateVoiceGlobe() {
+    console.log('🎯 Globe activation requested...');
+    
+    try {
+        // Set globe to active state
+        setGlobeState('active');
+        
+        // Start VAPI session
+        await startVAPISession();
+        
+        // Start transcription
+        setTimeout(() => {
+            startTranscription();
+        }, 1000);
+        
+        console.log('✅ Voice globe activated successfully');
+        
+    } catch (error) {
+        console.error('❌ Error activating globe:', error);
+        setGlobeState('inactive');
+    }
+}
+
+// Start VAPI session with best practices
+async function startVAPISession() {
+    console.log('📞 Starting VAPI session...');
+    
+    try {
+        // Show VAPI widget container
+        const vapiContainer = document.getElementById('vapiWidgetContainer');
+        if (vapiContainer) {
+            vapiContainer.style.display = 'block';
+        }
+        
+        // If VAPI Web SDK is available, use it
+        if (window.Vapi) {
+            if (!window.vapiInstance) {
+                window.vapiInstance = new window.Vapi(VAPI_CONFIG.publicKey);
+                
+                // Set up event handlers following VAPI best practices
+                window.vapiInstance.on('call-start', () => {
+                    console.log('📞 VAPI call started');
+                    updateGlobeStatus('Voice call active');
+                    setGlobeState('active');
+                });
+                
+                window.vapiInstance.on('call-end', () => {
+                    console.log('📞 VAPI call ended');
+                    updateGlobeStatus('Click to start again');
+                    setGlobeState('inactive');
+                });
+                
+                window.vapiInstance.on('speech-start', () => {
+                    console.log('🗣️ User speech detected');
+                    updateGlobeStatus('Listening...');
+                });
+                
+                window.vapiInstance.on('speech-end', () => {
+                    console.log('🤫 User speech ended');
+                    updateGlobeStatus('Processing...');
+                });
+                
+                window.vapiInstance.on('message', (message) => {
+                    console.log('💬 VAPI message:', message);
+                    
+                    if (message.type === 'transcript' && message.transcript) {
+                        addTranscriptMessage('user', message.transcript);
+                    } else if (message.type === 'function-call') {
+                        addTranscriptMessage('system', `Function called: ${message.functionCall.name}`);
+                    }
+                });
+                
+                window.vapiInstance.on('error', (error) => {
+                    console.error('❌ VAPI error:', error);
+                    updateGlobeStatus('Connection error - click to retry');
+                    setGlobeState('inactive');
+                });
+            }
+            
+            // Start the call with enhanced configuration
+            await window.vapiInstance.start({
+                assistantId: VAPI_CONFIG.assistantId,
+                // Voice pipeline configuration for optimal performance
+                assistantOverrides: {
+                    voicePipelineConfig: {
+                        startSpeakingPlan: {
+                            smartEndpointingPlan: {
+                                provider: "livekit",
+                                waitFunction: "2000 / (1 + exp(-10 * (x - 0.5)))"
+                            },
+                            waitSeconds: 0.4
+                        },
+                        stopSpeakingPlan: {
+                            numWords: 0,
+                            voiceSeconds: 0.2,
+                            backoffSeconds: 1.0
+                        }
+                    }
+                }
+            });
+            
+        } else {
+            // Fallback: show embedded iframe
+            console.log('🔄 Using VAPI iframe fallback...');
+            showVAPIEmbed();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error starting VAPI session:', error);
+        // Fallback to iframe
+        showVAPIEmbed();
+    }
+}
+
+// Show VAPI embedded iframe as fallback
+function showVAPIEmbed() {
+    const vapiContainer = document.getElementById('vapiWidgetContainer');
+    if (vapiContainer) {
+        vapiContainer.innerHTML = `
+            <div class="vapi-embed-container">
+                <iframe 
+                    src="https://vapi.ai?demo=true&shareKey=${VAPI_CONFIG.publicKey}&assistantId=${VAPI_CONFIG.assistantId}&embed=true&minimal=true&autoStart=true"
+                    width="100%"
+                    height="300"
+                    frameborder="0"
+                    allow="microphone; camera; autoplay; fullscreen"
+                    sandbox="allow-scripts allow-same-origin allow-microphone allow-forms allow-popups"
+                    style="border-radius: 15px; background: rgba(0,0,0,0.1);">
+                </iframe>
+            </div>
+        `;
+        vapiContainer.style.display = 'block';
+    }
+}
+
+// Update globe status display
+function updateGlobeStatus(message) {
+    const statusText = document.getElementById('globeStatusText');
+    if (statusText) {
+        statusText.textContent = message;
+    }
+}
+
+// Enhanced transcription functions
+function startTranscription() {
+    if (isTranscribing) return;
+    
+    console.log('📝 Starting enhanced transcription...');
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.warn('⚠️ Speech recognition not supported');
+        showTranscriptionError('Speech recognition not supported in this browser');
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    speechRecognition = new SpeechRecognition();
+    
+    // Enhanced configuration for better accuracy
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = true;
+    speechRecognition.lang = 'en-US';
+    speechRecognition.maxAlternatives = 3;
+
+    speechRecognition.onstart = () => {
+        console.log('🎤 Enhanced transcription started');
+        isTranscribing = true;
+        updateTranscriptionUI(true);
+        clearTranscriptionPlaceholder();
+    };
+
+    speechRecognition.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript;
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+
+        if (finalTranscript) {
+            addTranscriptMessage('user', finalTranscript);
+        }
+        
+        // Show interim results in real-time
+        if (interimTranscript) {
+            showInterimTranscript(interimTranscript);
+        }
+    };
+
+    speechRecognition.onerror = (event) => {
+        console.error('❌ Speech recognition error:', event.error);
+        showTranscriptionError(`Speech recognition error: ${event.error}`);
+        stopTranscription();
+    };
+
+    speechRecognition.onend = () => {
+        console.log('🔇 Speech recognition ended');
+        if (isTranscribing) {
+            // Restart recognition to keep it continuous
+            setTimeout(() => {
+                if (isTranscribing) {
+                    speechRecognition.start();
+                }
+            }, 100);
+        }
+    };
+
+    speechRecognition.start();
+}
+
+// Show interim transcript results
+function showInterimTranscript(text) {
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (!transcriptionContent) return;
+    
+    // Remove any existing interim transcript
+    const existingInterim = transcriptionContent.querySelector('.interim-transcript');
+    if (existingInterim) {
+        existingInterim.remove();
+    }
+    
+    // Add new interim transcript
+    const interimDiv = document.createElement('div');
+    interimDiv.className = 'interim-transcript';
+    interimDiv.innerHTML = `
+        <div class="transcript-entry interim">
+            <div class="transcript-speaker">You (speaking...)</div>
+            <p class="transcript-text interim-text">${text}</p>
+        </div>
+    `;
+    
+    transcriptionContent.appendChild(interimDiv);
+    transcriptionContent.scrollTop = transcriptionContent.scrollHeight;
+}
+
+// Add transcript message with enhanced formatting
+function addTranscriptMessage(speaker, text) {
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (!transcriptionContent) return;
+
+    // Remove placeholder and interim transcripts
+    clearTranscriptionPlaceholder();
+    const interimTranscript = transcriptionContent.querySelector('.interim-transcript');
+    if (interimTranscript) {
+        interimTranscript.remove();
+    }
+
+    // Create enhanced transcript entry
+    const entry = document.createElement('div');
+    entry.className = `transcript-entry ${speaker}`;
+    
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const speakerName = speaker === 'user' ? 'You' : speaker === 'ai' ? 'AI Assistant' : 'System';
+    
+    entry.innerHTML = `
+        <div class="transcript-meta">
+            <div class="transcript-speaker">
+                <i class="fas fa-${speaker === 'user' ? 'user' : speaker === 'ai' ? 'robot' : 'cog'}"></i>
+                ${speakerName}
+            </div>
+            <div class="transcript-timestamp">${timestamp}</div>
+        </div>
+        <p class="transcript-text">${text}</p>
+    `;
+
+    transcriptionContent.appendChild(entry);
+    transcriptionContent.scrollTop = transcriptionContent.scrollHeight;
+    
+    // Add to conversation history for VAPI context
+    if (window.conversationHistory) {
+        window.conversationHistory.push({ speaker, text, timestamp: Date.now() });
+    } else {
+        window.conversationHistory = [{ speaker, text, timestamp: Date.now() }];
+    }
+}
+
+// Clear transcription
+function clearTranscription() {
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (transcriptionContent) {
+        transcriptionContent.innerHTML = `
+            <div class="transcript-placeholder">
+                <div class="placeholder-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <p>Your conversation will appear here</p>
+                <small>Click the globe above to start talking</small>
+            </div>
+        `;
+    }
+    
+    // Clear conversation history
+    window.conversationHistory = [];
+}
+
+// Update transcription UI
+function updateTranscriptionUI(active) {
+    const button = document.getElementById('transcriptionToggleBtn');
+    
+    if (button) {
+        if (active) {
+            button.classList.add('active');
+            button.innerHTML = '<i class="fas fa-stop"></i><span>Stop Transcription</span>';
+        } else {
+            button.classList.remove('active');
+            button.innerHTML = '<i class="fas fa-microphone"></i><span>Start Transcription</span>';
+        }
+    }
+}
+
+// Make functions globally available
+window.activateVoiceGlobe = activateVoiceGlobe;
+window.addTranscriptMessage = addTranscriptMessage;
+
 function showVoiceCompletion() {
     const formData = {
         formType: 'voice',
@@ -3268,7 +3744,89 @@ function showVoiceCompletion() {
     };
     
     console.log('Voice interaction completed:', formData);
-    showFormCompletion('voice', formData);
+    
+    // Show completion modal or transition back to cards
+    const duration = getGlobalElapsedTime();
+    const { minutes, seconds } = formatTimeForDisplay(duration);
+    
+    // Create completion popup
+    createVoiceCompletionPopup(minutes, seconds);
+}
+
+function createVoiceCompletionPopup(minutes, seconds) {
+    const popup = document.createElement('div');
+    popup.className = 'voice-completion-popup';
+    popup.innerHTML = `
+        <div class="completion-content">
+            <div class="completion-header">
+                <h3>🎉 Voice Session Complete!</h3>
+                <p>Your AI conversation session has ended</p>
+            </div>
+            <div class="session-summary">
+                <div class="summary-item">
+                    <i class="fas fa-clock"></i>
+                    <span>${minutes}m ${seconds}s</span>
+                </div>
+                <div class="summary-item">
+                    <i class="fas fa-comments"></i>
+                    <span>${window.conversationHistory?.length || 0} messages</span>
+                </div>
+            </div>
+            <div class="completion-actions">
+                <button onclick="restartVoiceSession()" class="btn-primary">
+                    <i class="fas fa-redo"></i> New Session
+                </button>
+                <button onclick="closeFormInterface()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Cards
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Auto-close after 30 seconds
+    setTimeout(() => {
+        if (document.body.contains(popup)) {
+            popup.remove();
+        }
+    }, 30000);
+}
+
+function restartVoiceSession() {
+    // Close completion popup
+    const popup = document.querySelector('.voice-completion-popup');
+    if (popup) popup.remove();
+    
+    // Reset globe to inactive state
+    setGlobeState('inactive');
+    
+    // Clear transcription
+    clearTranscription();
+    
+    // Stop any ongoing VAPI session
+    if (window.vapiInstance) {
+        window.vapiInstance.stop();
+    }
+    
+    console.log('🔄 Voice session reset for new conversation');
+}
+
+// Voice completion function
+function showVoiceCompletion() {
+    const formData = {
+        formType: 'voice',
+        timeSpent: getGlobalElapsedTime()
+    };
+    
+    console.log('Voice interaction completed:', formData);
+    
+    // Show completion modal or transition back to cards
+    const duration = getGlobalElapsedTime();
+    const { minutes, seconds } = formatTimeForDisplay(duration);
+    
+    // Create completion popup
+    createVoiceCompletionPopup(minutes, seconds);
 }
 
 function toggleFullscreen() {
